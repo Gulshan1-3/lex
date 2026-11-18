@@ -1,0 +1,12 @@
+# Build directory
+build/
+bin/
+
+# Generated artifacts
+*.o
+*.a
+*.so
+*.dot
+lex.yy.*
+calc_lexer*
+cpp_tokens_lexer*
