@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Project Report: Modern C++ Lexical Analyzer Generator</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Project Report: Modern C++ Lexical Analyzer
+Generator</h1>
+</header>
+<h1 id="project-report-modern-c-lexical-analyzer-generator-lex">PROJECT
+REPORT: MODERN C++ LEXICAL ANALYZER GENERATOR (LEX)</h1>
+<p><strong>Project Title</strong>: Design and Implementation of a
+Lexical Analyzer Generator in Modern C++<br />
+<strong>Author</strong>: Gulshan Sharma<br />
+<strong>Target Environment</strong>: Linux, C++20, GCC 14 / Clang<br />
+<strong>Repository</strong>: <a
+href="https://github.com/Gulshan1-3/lex">https://github.com/Gulshan1-3/lex</a><br />
+<strong>Interactive Live Demo</strong>: <a
+href="https://gulshan1-3.github.io/lex/">https://gulshan1-3.github.io/lex/</a></p>
+<hr />
+<h2 id="executive-submission-summary-links">Executive Submission Summary
+&amp; Links</h2>
+<ul>
+<li><p><strong>Live Demo Link (Online Playground)</strong>:<br />
+<a
+href="https://gulshan1-3.github.io/lex/">https://gulshan1-3.github.io/lex/</a><br />
+<em>(Interactive browser-based playground to load Lex specifications,
+test custom inputs, observe real-time token streams, and inspect DFA
+state graphs)</em></p></li>
+<li><p><strong>GitHub Repository Link</strong>:<br />
+<a
+href="https://github.com/Gulshan1-3/lex">https://github.com/Gulshan1-3/lex</a><br />
+<em>(Contains complete source code, test suite, CMake build system,
+examples, and documentation)</em></p></li>
+</ul>
+<hr />
+<h2 id="project-overview">1. Project Overview</h2>
+<p>Lexical analysis (scanning) is the foundational first phase of any
+compiler or language processing system. A <strong>Lexical Analyzer
+Generator</strong> (such as classic <code>lex</code> or
+<code>flex</code>) accepts high-level regular expression specifications
+paired with semantic action code and automatically synthesizes an
+optimized, deterministic scanner state machine.</p>
+<p>This project implements a complete, standalone Lexical Analyzer
+Generator (<code>lex_cpp</code>) written in <strong>ISO C++20</strong>.
+The software architecture and implementation strictly adhere to the
+principles and idioms championed by <strong>Bjarne Stroustrup</strong>,
+the creator of C++: * Direct representation of domain concepts via
+strong types. * Strict Resource Acquisition Is Initialization (RAII)
+with zero manual memory management
+(<code>new</code>/<code>delete</code>). * Value semantics and standard
+library integration (<code>std::vector</code>,
+<code>std::string_view</code>, <code>std::bitset&lt;256&gt;</code>). *
+Minimalist, robust concrete classes without excessive OOP inheritance
+hierarchies (“no Java-in-C++”).</p>
+<hr />
+<h2 id="core-architectural-pipeline">2. Core Architectural Pipeline</h2>
+<p>The generation pipeline follows the classical compiler pipeline with
+modern optimizations:</p>
+<pre><code>  Input .l File
+        |
+        v
+  [ Spec_parser ] ------&gt; Parses Prologue %{...%}, Definitions, Rules, Epilogue
+        |
+        v
+  [ Regex_parser ] -----&gt; Constructs Abstract Syntax Tree (AST)
+        |
+        v
+  [ Thompson_builder ] -&gt; Synthesizes Combined NFA with Prioritized Rule Tags
+        |
+        v
+  [ Dfa_builder ] ------&gt; Subset Construction (Powerset &amp; epsilon-closure)
+        |
+        v
+  [ Dfa_minimizer ] ----&gt; Hopcroft / Moore Partition Refinement (Prunes unreachable)
+        |
+        v
+  [ Code_generator ] ---&gt; Generates C++20 Lexer Class with Maximal Munch Buffering</code></pre>
+<h3 id="specification-parser-spec_parser">2.1 Specification Parser
+(<code>Spec_parser</code>)</h3>
+<p>Parses the standard 3-section Lex specification format: 1.
+<strong>Definitions Section</strong>: Captures C++ header declarations
+(<code>%{ ... %}</code>) and named macro substitutions (e.g.,
+<code>DIGIT [0-9]</code>). 2. <strong>Rules Section</strong>: Parses
+regular expression patterns mapped to action blocks
+<code>{ ... }</code>, accurately tracking brace depth and comment
+escapes. Handles rule fall-through syntax (<code>|</code>). 3.
+<strong>Epilogue Section</strong>: Preserves user-defined driver code
+(such as <code>main()</code>) copied verbatim to the generated
+output.</p>
+<h3 id="regular-expression-parser-regex_parser">2.2 Regular Expression
+Parser (<code>Regex_parser</code>)</h3>
+<p>Implements a recursive-descent parser producing a strongly typed AST:
+* <strong>Primitives</strong>: Literals, escape codes (<code>\n</code>,
+<code>\t</code>, <code>\r</code>, <code>\xHH</code>), wildcards
+(<code>.</code>), quoted strings (<code>"keyword"</code>). *
+<strong>Character Classes</strong>: Explicit ranges
+(<code>[a-zA-Z0-9_]</code>), leading hyphens (<code>[-a-z]</code>),
+negated classes (<code>[^0-9]</code>). * <strong>Closures &amp;
+Operators</strong>: Kleene star (<code>*</code>), positive closure
+(<code>+</code>), optional quantifier (<code>?</code>), counted
+repetitions (<code>{m,n}</code>), concatenation, and alternation
+(<code>|</code>). * <strong>Macro Expansion</strong>: Recursive
+expansion of named definitions (<code>{DIGIT}</code>).</p>
+<h3 id="thompsons-nfa-construction-thompson_builder">2.3 Thompson’s NFA
+Construction (<code>Thompson_builder</code>)</h3>
+<p>Transforms the AST into a Non-Deterministic Finite Automaton with
+<span class="math inline"><em>ϵ</em></span>-transitions: * Each rule
+<span class="math inline"><em>i</em></span> is compiled into an NFA
+fragment. * All rule NFAs are unified under a single master start state.
+* The accepting state of each rule is tagged with its
+<code>Rule_id</code> and specification index to enforce rule
+precedence.</p>
+<h3 id="subset-construction-dfa_builder">2.4 Subset Construction
+(<code>Dfa_builder</code>)</h3>
+<p>Performs powerset construction to convert the combined NFA into a
+Deterministic Finite Automaton (DFA): * Calculates <span
+class="math inline"><em>ϵ</em></span>-closure sets using depth-first
+search. * Maps subsets of NFA states to unique DFA states. * Resolves
+rule conflict: if a DFA state contains multiple NFA accepting states,
+the rule appearing earliest in the specification file wins.</p>
+<h3 id="dfa-minimization-dfa_minimizer">2.5 DFA Minimization
+(<code>Dfa_minimizer</code>)</h3>
+<ul>
+<li>Performs reachability analysis via Breadth-First Search to prune
+unreachable states.</li>
+<li>Employs partition refinement (Hopcroft/Moore):
+<ul>
+<li>Initial partitions group non-accepting states and separate accepting
+states by their distinct <code>Rule_id</code>.</li>
+<li>Partitions are iteratively refined until all transitions within a
+group target identical partition blocks.</li>
+</ul></li>
+<li>Yields minimal state tables with reduced memory and cache
+footprint.</li>
+</ul>
+<h3 id="modern-c-code-generator-code_generator">2.6 Modern C++ Code
+Generator (<code>Code_generator</code>)</h3>
+<p>Generates production-grade, warning-free ISO C++20 code: *
+<strong>Maximal Munch (Longest Match)</strong>: The scanner greedily
+advances as far as possible while transitions exist, tracking the last
+visited accepting state and position. If a dead state is reached, it
+seamlessly rolls back to the longest accepted token boundary. *
+<strong>Dual Input Modes</strong>: Seamlessly processes both streaming
+input (<code>std::istream&amp;</code>) and zero-copy string buffers
+(<code>std::string_view</code>). * <strong>Standard Interface</strong>:
+Provides <code>yytext</code>, <code>yyleng</code>,
+<code>yylineno</code>, <code>yycolumn</code>, and
+<code>yylex()</code>.</p>
+<hr />
+<h2 id="adherence-to-bjarne-stroustrups-c-principles">3. Adherence to
+Bjarne Stroustrup’s C++ Principles</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Principle</th>
+<th>Implementation in <code>lex_cpp</code></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>RAII &amp; No Raw Pointers</strong></td>
+<td>Memory is automatically managed by <code>std::unique_ptr</code> and
+standard containers. Zero <code>new</code> or <code>delete</code>
+keywords in application logic.</td>
+</tr>
+<tr class="even">
+<td><strong>Direct Concept Representation</strong></td>
+<td>Concrete domain types: <code>Char_set</code>,
+<code>Nfa_state</code>, <code>Dfa_state</code>, <code>Rule</code>,
+<code>Spec_file</code>, <code>Lexer_generator</code>.</td>
+</tr>
+<tr class="odd">
+<td><strong>Value Semantics</strong></td>
+<td>Fast, copyable concrete types like <code>Char_set</code> built over
+<code>std::bitset&lt;256&gt;</code>.</td>
+</tr>
+<tr class="even">
+<td><strong>Strict Type Safety</strong></td>
+<td>Scoped enumerations (<code>enum class Regex_kind</code>), strongly
+typed <code>State_id</code> and <code>Rule_id</code>.</td>
+</tr>
+<tr class="odd">
+<td><strong>Standard Algorithms &amp; Ranges</strong></td>
+<td>Leverages <code>&lt;algorithm&gt;</code>,
+<code>&lt;ranges&gt;</code>, and <code>&lt;bitset&gt;</code> for clean,
+expressive logic.</td>
+</tr>
+<tr class="even">
+<td><strong>Zero Warnings</strong></td>
+<td>Builds cleanly with
+<code>-Wall -Wextra -Wpedantic -Wconversion -Wshadow</code>.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="verification-testing">4. Verification &amp; Testing</h2>
+<h3 id="automated-test-suite">4.1 Automated Test Suite</h3>
+<p>The project includes a self-contained unit and integration test suite
+(<code>tests/test_runner</code>): *
+<strong><code>test_char_set</code></strong>: Bitset operations, range
+construction, set union, intersection, negation. *
+<strong><code>test_regex</code></strong>: Lexing, parsing, escape
+sequences, bracket classes, macro substitution. *
+<strong><code>test_automata</code></strong>: Thompson NFA construction,
+subset DFA conversion, Hopcroft minimization, and rule priority. *
+<strong><code>test_end_to_end</code></strong>: Specification parsing and
+end-to-end scanner generation.</p>
+<p><strong>Result</strong>: 63 / 63 tests passing with 0 failures.</p>
+<h3 id="practical-examples">4.2 Practical Examples</h3>
+<h4 id="arithmetic-calculator-scanner-examplescalc.l">1. Arithmetic
+Calculator Scanner (<code>examples/calc.l</code>)</h4>
+<p>Tokenizes complex expressions containing floating-point numbers,
+integers, identifiers, and parenthesized operators: * Input:
+<code>total = 42 + 3.14159 * (radius - 10);</code> * Reduction: 47 NFA
+states <span class="math inline">→</span> 19 DFA states <span
+class="math inline">→</span> <strong>15 Minimized DFA states</strong>. *
+Successfully verified token stream and line/column positions.</p>
+<h4 id="c-tokenizer-examplescpp_tokens.l">2. C++ Tokenizer
+(<code>examples/cpp_tokens.l</code>)</h4>
+<p>Tokenizes real-world C++ code constructs including keywords
+(<code>namespace</code>, <code>struct</code>, <code>int</code>,
+<code>return</code>), hex literals (<code>0x2A</code>), line comments,
+and multi-character operators (<code>-&gt;</code>, <code>&gt;=</code>,
+<code>&amp;&amp;</code>, <code>!=</code>). * Reduction: 315 NFA states
+<span class="math inline">→</span> 100 DFA states <span
+class="math inline">→</span> <strong>58 Minimized DFA states</strong>. *
+Confirmed maximal munch priority (e.g. <code>-&gt;</code> matched as
+single operator rather than <code>-</code> followed by
+<code>&gt;</code>).</p>
+<hr />
+<h2 id="build-and-execution-instructions">5. Build and Execution
+Instructions</h2>
+<h3 id="prerequisites">Prerequisites</h3>
+<ul>
+<li>GCC 10+ or Clang 10+ (supporting C++20)</li>
+<li>CMake 3.20+</li>
+<li>Make or Ninja</li>
+</ul>
+<h3 id="build-steps">Build Steps</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Clone the repository</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/Gulshan1-3/lex.git</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> lex</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Configure and build</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">cmake</span> <span class="at">-B</span> build</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">cmake</span> <span class="at">--build</span> build</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Run automated tests</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="ex">./build/test_runner</span></span></code></pre></div>
+<h3 id="generating-and-compiling-a-scanner">Generating and Compiling a
+Scanner</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate C++ scanner from specification</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./build/lex_cpp</span> examples/calc.l <span class="at">-o</span> calc_lexer.cpp <span class="at">--verbose</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Compile the generated scanner</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="ex">g++</span> <span class="at">-std</span><span class="op">=</span>c++20 <span class="at">-Wall</span> <span class="at">-Wextra</span> <span class="at">-Wpedantic</span> calc_lexer.cpp <span class="at">-o</span> calc_lexer</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Run scanner</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="ex">./calc_lexer</span></span></code></pre></div>
+<hr />
+<h2 id="live-interactive-demo">6. Live Interactive Demo</h2>
+<p>An interactive Web demonstration is deployed on GitHub Pages: *
+<strong>Live Demo URL</strong>: <a
+href="https://gulshan1-3.github.io/lex/">https://gulshan1-3.github.io/lex/</a>
+* <strong>Features</strong>: * Real-time lexical analysis in the
+browser. * Presets for Calculator (<code>calc.l</code>), C++ Tokenizer
+(<code>cpp_tokens.l</code>), and JSON Scanner (<code>json.l</code>). *
+Live Token Stream visualization with matched lexemes, lengths, and
+positions. * Automaton statistics (NFA states, DFA states, Minimized DFA
+states). * Live C++20 Scanner code viewer with copy functionality. *
+Graphviz DOT graph export.</p>
+<hr />
+<h2 id="conclusion">7. Conclusion</h2>
+<p>The <code>lex_cpp</code> project demonstrates how classical compiler
+algorithms (Thompson’s construction, subset powerset construction,
+Hopcroft partition refinement, and maximal munch scanning) can be
+implemented with elegance, optimal performance, and uncompromising type
+safety using modern ISO C++20 according to Bjarne Stroustrup’s design
+guidelines.</p>
+</body>
+</html>
