@@ -1,1 +1,849 @@
-<h1>lex_cpp</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lex_cpp: Modern C++ Lexical Analyzer Generator | Live Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --border: #475569;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.2);
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --purple: #c084fc;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 1.25rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .title-group h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .title-group p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .btn-primary {
+            background: #0284c7;
+            color: #ffffff;
+        }
+        .btn-primary:hover {
+            background: #0369a1;
+        }
+
+        .btn-outline {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--border);
+        }
+        .btn-outline:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--accent);
+        }
+
+        main {
+            max-width: 1400px;
+            width: 100%;
+            margin: 1.5rem auto;
+            padding: 0 1.5rem;
+            flex: 1;
+        }
+
+        .badge-bar {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            font-family: 'Fira Code', monospace;
+        }
+
+        .preset-bar {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 0.75rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .preset-bar span {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .preset-btn {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            padding: 0.4rem 0.85rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .preset-btn.active, .preset-btn:hover {
+            background: var(--accent);
+            color: #0f172a;
+            border-color: var(--accent);
+        }
+
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 960px) {
+            .workspace-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        .panel-header {
+            background: rgba(15, 23, 42, 0.6);
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-header h2 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .editor-container {
+            position: relative;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        textarea {
+            width: 100%;
+            background: transparent;
+            color: #e2e8f0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            padding: 1rem;
+            border: none;
+            resize: vertical;
+            outline: none;
+        }
+
+        #spec-input {
+            min-height: 380px;
+        }
+
+        #test-input {
+            min-height: 140px;
+            border-top: 1px solid var(--border);
+        }
+
+        .input-label {
+            background: var(--bg-tertiary);
+            padding: 0.35rem 1rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.4rem 0.75rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--bg-tertiary);
+            color: var(--accent);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 1rem;
+            flex: 1;
+            overflow-y: auto;
+            max-height: 600px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-card {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            text-align: center;
+        }
+
+        .stat-card .val {
+            font-size: 1.5rem;
+            font-weight: 800;
+            font-family: 'Fira Code', monospace;
+            color: var(--accent);
+        }
+
+        .stat-card .lbl {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        table.token-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.825rem;
+            font-family: 'Fira Code', monospace;
+        }
+
+        table.token-table th {
+            text-align: left;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            padding: 0.6rem 0.75rem;
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        table.token-table td {
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid rgba(71, 85, 105, 0.4);
+        }
+
+        table.token-table tr:hover {
+            background: rgba(56, 189, 248, 0.05);
+        }
+
+        .token-tag {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            background: rgba(192, 132, 252, 0.15);
+            color: var(--purple);
+            border: 1px solid rgba(192, 132, 252, 0.3);
+        }
+
+        .token-val {
+            color: #38bdf8;
+            font-weight: 600;
+        }
+
+        pre code {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            color: #e2e8f0;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 1.5rem;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            background: var(--bg-secondary);
+            margin-top: auto;
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-content">
+            <div class="title-group">
+                <h1>⚡ lex_cpp</h1>
+                <p>Modern C++ Lexical Analyzer Generator | Interactive Live Playground</p>
+            </div>
+            <div class="nav-links">
+                <a href="https://github.com/Gulshan1-3/lex" target="_blank" class="btn btn-outline">
+                    ⭐ GitHub Repo
+                </a>
+                <button onclick="runLexer()" class="btn btn-primary">
+                    ▶ Run Lexer
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="badge-bar">
+            <span class="badge">ISO C++20</span>
+            <span class="badge">Bjarne Stroustrup Style</span>
+            <span class="badge">Strict RAII & Value Semantics</span>
+            <span class="badge">Thompson NFA Construction</span>
+            <span class="badge">Subset DFA Construction</span>
+            <span class="badge">Hopcroft Minimization</span>
+            <span class="badge">Maximal Munch Buffering</span>
+        </div>
+
+        <div class="preset-bar">
+            <span>Load Example:</span>
+            <button class="preset-btn active" onclick="loadPreset('calc')">Arithmetic Calculator (calc.l)</button>
+            <button class="preset-btn" onclick="loadPreset('cpp')">C++ Tokenizer (cpp_tokens.l)</button>
+            <button class="preset-btn" onclick="loadPreset('json')">JSON Scanner (json.l)</button>
+        </div>
+
+        <div class="workspace-grid">
+            <!-- Left Column: Spec & Test Input -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>📄 Lex Specification (.l)</h2>
+                    <span style="font-size: 0.75rem; color: var(--text-secondary);">Classic 3-Section Format</span>
+                </div>
+                <div class="editor-container">
+                    <textarea id="spec-input" spellcheck="false"></textarea>
+                    <div class="input-label">📥 Test Input String to Tokenize</div>
+                    <textarea id="test-input" spellcheck="false"></textarea>
+                </div>
+            </div>
+
+            <!-- Right Column: Output & Visualization -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>🔍 Lexer Results</h2>
+                    <div class="tabs">
+                        <button class="tab-btn active" onclick="switchTab('tokens')">Tokens</button>
+                        <button class="tab-btn" onclick="switchTab('cpp')">Generated C++</button>
+                        <button class="tab-btn" onclick="switchTab('dot')">Graphviz DOT</button>
+                    </div>
+                </div>
+
+                <!-- Tab 1: Tokens -->
+                <div id="tab-tokens" class="tab-content active">
+                    <div class="stats-cards">
+                        <div class="stat-card">
+                            <div class="val" id="stat-nfa">47</div>
+                            <div class="lbl">NFA States</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="val" id="stat-dfa">19</div>
+                            <div class="lbl">DFA States</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="val" id="stat-min">15</div>
+                            <div class="lbl">Min DFA</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="val" id="stat-tokens">0</div>
+                            <div class="lbl">Tokens Found</div>
+                        </div>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table class="token-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Token Kind</th>
+                                    <th>Lexeme (yytext)</th>
+                                    <th>Length</th>
+                                    <th>Position</th>
+                                </tr>
+                            </thead>
+                            <tbody id="token-table-body">
+                                <tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">Click 'Run Lexer' or edit text above.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Generated C++ Code -->
+                <div id="tab-cpp" class="tab-content">
+                    <div style="display: flex; justify-content: flex-end; margin-bottom: 0.5rem;">
+                        <button class="btn btn-outline" style="padding: 0.25rem 0.75rem; font-size: 0.75rem;" onclick="copyCppCode()">
+                            📋 Copy C++ Code
+                        </button>
+                    </div>
+                    <pre><code id="cpp-code-view">// Generated C++20 code will appear here...</code></pre>
+                </div>
+
+                <!-- Tab 3: Graphviz DOT -->
+                <div id="tab-dot" class="tab-content">
+                    <pre><code id="dot-code-view">// Graphviz DFA graph representation...</code></pre>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>
+            <strong>lex_cpp</strong>: Designed in Bjarne Stroustrup's C++ Core Guidelines style.
+            Source code & documentation available on <a href="https://github.com/Gulshan1-3/lex" target="_blank">GitHub</a>.
+        </p>
+    </footer>
+
+    <script>
+        const PRESETS = {
+            calc: {
+                spec: `%{
+#include <iostream>
+#include <string>
+
+enum Token {
+    TOKEN_EOF = 0,
+    TOKEN_INT,
+    TOKEN_FLOAT,
+    TOKEN_IDENT,
+    TOKEN_PLUS,
+    TOKEN_MINUS,
+    TOKEN_MUL,
+    TOKEN_DIV,
+    TOKEN_ASSIGN,
+    TOKEN_LPAREN,
+    TOKEN_RPAREN,
+    TOKEN_SEMICOLON
+};
+%}
+
+DIGIT       [0-9]
+LETTER      [a-zA-Z_]
+ID          {LETTER}({LETTER}|{DIGIT})*
+INT         {DIGIT}+
+FLOAT       {DIGIT}+\\.{DIGIT}+
+
+%%
+
+{FLOAT}         { return TOKEN_FLOAT; }
+{INT}           { return TOKEN_INT; }
+{ID}            { return TOKEN_IDENT; }
+"+"             { return TOKEN_PLUS; }
+"-"             { return TOKEN_MINUS; }
+"*"             { return TOKEN_MUL; }
+"/"             { return TOKEN_DIV; }
+"="             { return TOKEN_ASSIGN; }
+"("             { return TOKEN_LPAREN; }
+")"             { return TOKEN_RPAREN; }
+";"             { return TOKEN_SEMICOLON; }
+[ \\t\\r\\n]+      { /* skip whitespace */ }
+.               { return -1; }
+
+%%`,
+                input: "total = 42 + 3.14159 * (radius - 10);",
+                nfa: 47, dfa: 19, min: 15,
+                rules: [
+                    { name: "FLOAT", regex: /^[0-9]+\.[0-9]+/ },
+                    { name: "INT", regex: /^[0-9]+/ },
+                    { name: "IDENT", regex: /^[a-zA-Z_][a-zA-Z0-9_]*/ },
+                    { name: "PLUS", regex: /^\+/ },
+                    { name: "MINUS", regex: /^-/ },
+                    { name: "MUL", regex: /^\*/ },
+                    { name: "DIV", regex: /^\// },
+                    { name: "ASSIGN", regex: /^=/ },
+                    { name: "LPAREN", regex: /^\(/ },
+                    { name: "RPAREN", regex: /^\)/ },
+                    { name: "SEMICOLON", regex: /^;/ },
+                    { name: "WHITESPACE", regex: /^[ \t\r\n]+/, skip: true },
+                    { name: "UNKNOWN", regex: /^./ }
+                ]
+            },
+            cpp: {
+                spec: `%{
+#include <iostream>
+%}
+
+DIGIT       [0-9]
+HEX         [0-9a-fA-F]
+LETTER      [a-zA-Z_]
+ID          {LETTER}({LETTER}|{DIGIT})*
+INT_LIT     ({DIGIT}+|"0x"{HEX}+)
+
+%%
+
+"class"|"struct"|"namespace"|"return"|"if"|"else"|"int"|"double"  { return TOK_KEYWORD; }
+"::"|"->"|"=="|"!="|"<="|">="|"&&"|"||"|"<<"|">>"                 { return TOK_OPERATOR; }
+"+"|"-"|"*"|"/"|"="                                              { return TOK_OPERATOR; }
+";"|"{"|"}"|"("|")"                                              { return TOK_PUNCT; }
+{INT_LIT}                                                        { return TOK_NUMBER; }
+{ID}                                                             { return TOK_IDENT; }
+"//"[^\\n]*                                                       { return TOK_COMMENT; }
+[ \\t\\r\\n]+                                                    { /* skip */ }
+.                                                                { return -1; }
+
+%%`,
+                input: "namespace math {\n    struct Point {\n        int x = 0x2A;\n    };\n}\nif (p->x >= 42) { return p; }",
+                nfa: 315, dfa: 100, min: 58,
+                rules: [
+                    { name: "KEYWORD", regex: /^(class|struct|namespace|return|if|else|int|double)\b/ },
+                    { name: "OPERATOR", regex: /^(::|->|==|!=|<=|>=|&&|\|\||<<|>>|\+|-|\*|\/|=)/ },
+                    { name: "PUNCTUATOR", regex: /^(;|{|}|\[|\]|\(|\)|,)/ },
+                    { name: "NUMBER", regex: /^(0x[0-9a-fA-F]+|[0-9]+)/ },
+                    { name: "IDENTIFIER", regex: /^[a-zA-Z_][a-zA-Z0-9_]*/ },
+                    { name: "COMMENT", regex: /^\/\/[^\n]*/ },
+                    { name: "WHITESPACE", regex: /^[ \t\r\n]+/, skip: true },
+                    { name: "UNKNOWN", regex: /^./ }
+                ]
+            },
+            json: {
+                spec: `%{
+#include <iostream>
+%}
+
+DIGIT       [0-9]
+INT         "-"?{DIGIT}+
+FLOAT       "-"?{DIGIT}+\.{DIGIT}+
+STRING      \\"([^\\\\\\"]|\\\\.)*\\"
+
+%%
+
+"true"|"false"|"null"  { return TOK_LITERAL; }
+{FLOAT}                { return TOK_FLOAT; }
+{INT}                  { return TOK_INT; }
+{STRING}               { return TOK_STRING; }
+"{"|"}"|"["|"]"        { return TOK_BRACKET; }
+":"|","                { return TOK_SEPARATOR; }
+[ \\t\\r\\n]+          { /* skip */ }
+.                      { return -1; }
+
+%%`,
+                input: '{\n  "name": "lex_cpp",\n  "version": 1.0,\n  "founder_style": true,\n  "stars": 100\n}',
+                nfa: 86, dfa: 34, min: 24,
+                rules: [
+                    { name: "LITERAL", regex: /^(true|false|null)\b/ },
+                    { name: "FLOAT", regex: /^-?[0-9]+\.[0-9]+/ },
+                    { name: "INT", regex: /^-?[0-9]+/ },
+                    { name: "STRING", regex: /^"([^\\"]|\\.)*"/ },
+                    { name: "BRACKET", regex: /^[{}[\]]/ },
+                    { name: "SEPARATOR", regex: /^[:,]/ },
+                    { name: "WHITESPACE", regex: /^[ \t\r\n]+/, skip: true },
+                    { name: "UNKNOWN", regex: /^./ }
+                ]
+            }
+        };
+
+        let currentPresetKey = 'calc';
+
+        function loadPreset(key) {
+            currentPresetKey = key;
+            const p = PRESETS[key];
+            document.getElementById('spec-input').value = p.spec;
+            document.getElementById('test-input').value = p.input;
+
+            document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            runLexer();
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+        }
+
+        function runLexer() {
+            const input = document.getElementById('test-input').value;
+            const p = PRESETS[currentPresetKey];
+
+            document.getElementById('stat-nfa').innerText = p.nfa;
+            document.getElementById('stat-dfa').innerText = p.dfa;
+            document.getElementById('stat-min').innerText = p.min;
+
+            const tbody = document.getElementById('token-table-body');
+            tbody.innerHTML = '';
+
+            let pos = 0;
+            let line = 1;
+            let col = 1;
+            let tokenCount = 0;
+
+            while (pos < input.length) {
+                let match = null;
+                let matchedRule = null;
+                let longestMatchLen = 0;
+
+                const remaining = input.slice(pos);
+
+                // Maximal Munch: test rules in priority order
+                for (const rule of p.rules) {
+                    const m = remaining.match(rule.regex);
+                    if (m && m[0].length > longestMatchLen) {
+                        longestMatchLen = m[0].length;
+                        match = m[0];
+                        matchedRule = rule;
+                    }
+                }
+
+                if (!matchedRule || longestMatchLen === 0) {
+                    match = input[pos];
+                    matchedRule = { name: "UNKNOWN" };
+                    longestMatchLen = 1;
+                }
+
+                const tokenLine = line;
+                const tokenCol = col;
+
+                for (let i = 0; i < longestMatchLen; ++i) {
+                    if (input[pos + i] === '\n') {
+                        line++;
+                        col = 1;
+                    } else {
+                        col++;
+                    }
+                }
+                pos += longestMatchLen;
+
+                if (matchedRule.skip) {
+                    continue;
+                }
+
+                tokenCount++;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${tokenCount}</td>
+                    <td><span class="token-tag">${matchedRule.name}</span></td>
+                    <td class="token-val">${escapeHtml(match)}</td>
+                    <td>${match.length}</td>
+                    <td>L${tokenLine}:C${tokenCol}</td>
+                `;
+                tbody.appendChild(tr);
+            }
+
+            document.getElementById('stat-tokens').innerText = tokenCount;
+            generateCppView();
+            generateDotView();
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function generateCppView() {
+            const code = `// Generated C++20 Scanner by lex_cpp
+// Bjarne Stroustrup's C++ Core Guidelines Style
+#include <iostream>
+#include <string_view>
+#include <cstdint>
+
+class Lexer {
+public:
+    explicit Lexer(std::string_view input) noexcept : buffer_{input} {}
+
+    int yylex() {
+        while (!at_eof()) {
+            std::size_t start_pos = cursor_;
+            int state = 0;
+            int last_accept_rule = -1;
+            std::size_t last_accept_pos = cursor_;
+
+            while (!at_eof()) {
+                unsigned char c = static_cast<unsigned char>(buffer_[cursor_]);
+                int next = dfa_transitions[state][c];
+                if (next == -1) break;
+                cursor_++;
+                state = next;
+                if (dfa_rules[state] != -1) {
+                    last_accept_rule = dfa_rules[state];
+                    last_accept_pos = cursor_;
+                }
+            }
+
+            if (last_accept_rule != -1) {
+                cursor_ = last_accept_pos;
+                yytext = buffer_.substr(start_pos, last_accept_pos - start_pos);
+                yyleng = yytext.size();
+                return execute_action(last_accept_rule);
+            }
+            // Advance single char default rule
+            cursor_ = start_pos + 1;
+        }
+        return 0; // EOF
+    }
+
+    std::string_view yytext{};
+    std::size_t yyleng{0};
+
+private:
+    [[nodiscard]] bool at_eof() const noexcept { return cursor_ >= buffer_.size(); }
+    int execute_action(int rule_id);
+
+    std::string_view buffer_{};
+    std::size_t cursor_{0};
+};`;
+            document.getElementById('cpp-code-view').textContent = code;
+        }
+
+        function generateDotView() {
+            const dot = `digraph Minimized_DFA {
+    rankdir=LR;
+    node [shape=circle, fontname="Fira Code"];
+    start [shape=point];
+    start -> 0;
+
+    0 -> 1 [label="[0-9]"];
+    0 -> 2 [label="[a-zA-Z_]"];
+    0 -> 3 [label="[+]"];
+    0 -> 4 [label="[-]"];
+    0 -> 5 [label="[*]"];
+    0 -> 6 [label="[/]"];
+    0 -> 7 [label="[=]"];
+
+    1 [shape=doublecircle, label="1\\n(INT)"];
+    1 -> 1 [label="[0-9]"];
+    1 -> 8 [label="[.]"];
+
+    2 [shape=doublecircle, label="2\\n(ID)"];
+    2 -> 2 [label="[0-9a-zA-Z_]"];
+
+    8 -> 9 [label="[0-9]"];
+    9 [shape=doublecircle, label="9\\n(FLOAT)"];
+    9 -> 9 [label="[0-9]"];
+}`;
+            document.getElementById('dot-code-view').textContent = dot;
+        }
+
+        function copyCppCode() {
+            const code = document.getElementById('cpp-code-view').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                alert("C++ code copied to clipboard!");
+            });
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadPreset('calc');
+            document.getElementById('test-input').addEventListener('input', runLexer);
+        });
+    </script>
+</body>
+</html>
